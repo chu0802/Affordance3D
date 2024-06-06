@@ -22,7 +22,6 @@ def main(cfg, scene_cfg):
 
     mesh = get_textured_mesh(scene_cfg["scene.mesh_path"], device=device)
 
-    # fauna = get_mesh_with_texture_atlas(cfg["object_path"], device=device)
     fauna = generate_fauna(cfg, device)
 
     view_points, look_at = load_view_points(scene_name, prompt, cfg["view_points_path"])
