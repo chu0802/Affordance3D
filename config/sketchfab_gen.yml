@@ -3,8 +3,14 @@ path_prefix: "/mnt/data/merced/data"
 log_dir: "data/log_genzi"
 
 view_points_path: "view_points.json"
-object_path: "fg.obj"
+object_path: "koala.obj"
 
+fauna_cfg:
+  input_image: example_images/koala.png
+  model_path: "ckpts/iter0800000.pth"
+  model_config_path: "ckpts/configs.yml"
+
+seed: 1102
 scene_idx: 0
 prompt_idx: 0
 

@@ -5,13 +5,10 @@ import torch
 from omegaconf import OmegaConf
 from pytorch3d.renderer import look_at_view_transform
 
-from src.pytorch3d_api import (
-    get_mesh_with_texture_atlas,
-    get_textured_mesh,
-    put_obj_into_scene,
-)
+from src.fauna_api import generate_fauna
+from src.pytorch3d_api import get_textured_mesh, put_obj_into_scene
 from src.render import render
-from src.utils import load_view_points, omegaconf_to_dotdict
+from src.utils import fix_seed, load_view_points, omegaconf_to_dotdict
 
 
 def main(cfg, scene_cfg):
@@ -25,7 +22,8 @@ def main(cfg, scene_cfg):
 
     mesh = get_textured_mesh(scene_cfg["scene.mesh_path"], device=device)
 
-    cat = get_mesh_with_texture_atlas(cfg["object_path"], device=device)
+    # fauna = get_mesh_with_texture_atlas(cfg["object_path"], device=device)
+    fauna = generate_fauna(cfg, device)
 
     view_points, look_at = load_view_points(scene_name, prompt, cfg["view_points_path"])
 
@@ -34,11 +32,11 @@ def main(cfg, scene_cfg):
     )
 
     concat_mesh = put_obj_into_scene(
-        cat,
+        fauna,
         mesh,
-        R=[-90.0, 0.0, -90.0],
-        T=np.array(look_at) + [0, -0.5, -0.4],
-        S=3,
+        R=[100.0, 0.0, -90.0],
+        T=np.array(look_at) + [-0.4, -0.9, -0.2],
+        S=0.2,
     )
 
     render(
@@ -65,4 +63,5 @@ if __name__ == "__main__":
 
     scene_cfg = omegaconf_to_dotdict(OmegaConf.load(scene_cfg_path.as_posix()))
 
+    fix_seed(cfg["seed"])
     main(cfg, scene_cfg)
