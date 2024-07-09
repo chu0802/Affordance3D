@@ -147,3 +147,93 @@ def load_obj(filename, clear_ks=True, mtl_override=None):
     return mesh.Mesh(
         vertices, faces, normals, nfaces, texcoords, tfaces, material=uber_material
     )
+
+
+######################################################################################
+# Save mesh object to objfile
+######################################################################################
+
+
+def write_obj(
+    folder, fname, mesh, idx, save_material=True, feat=None, resolution=[256, 256]
+):
+    obj_file = os.path.join(folder, fname + ".obj")
+    print("Writing mesh: ", obj_file)
+    with open(obj_file, "w") as f:
+        f.write(f"mtllib {fname}.mtl\n")
+        f.write("g default\n")
+
+        v_pos = (
+            mesh.v_pos[idx].detach().cpu().numpy() if mesh.v_pos is not None else None
+        )
+        v_nrm = (
+            mesh.v_nrm[idx].detach().cpu().numpy() if mesh.v_nrm is not None else None
+        )
+        v_tex = (
+            mesh.v_tex[idx].detach().cpu().numpy() if mesh.v_tex is not None else None
+        )
+
+        t_pos_idx = (
+            mesh.t_pos_idx[0].detach().cpu().numpy()
+            if mesh.t_pos_idx is not None
+            else None
+        )
+        t_nrm_idx = (
+            mesh.t_nrm_idx[0].detach().cpu().numpy()
+            if mesh.t_nrm_idx is not None
+            else None
+        )
+        t_tex_idx = (
+            mesh.t_tex_idx[0].detach().cpu().numpy()
+            if mesh.t_tex_idx is not None
+            else None
+        )
+
+        print("    writing %d vertices" % len(v_pos))
+        for v in v_pos:
+            f.write("v {} {} {} \n".format(v[0], v[1], v[2]))
+
+        if v_tex is not None and save_material:
+            print("    writing %d texcoords" % len(v_tex))
+            assert len(t_pos_idx) == len(t_tex_idx)
+            for v in v_tex:
+                f.write("vt {} {} \n".format(v[0], 1.0 - v[1]))
+
+        if v_nrm is not None:
+            print("    writing %d normals" % len(v_nrm))
+            assert len(t_pos_idx) == len(t_nrm_idx)
+            for v in v_nrm:
+                f.write("vn {} {} {}\n".format(v[0], v[1], v[2]))
+
+        # faces
+        f.write("s 1 \n")
+        f.write("g pMesh1\n")
+        f.write("usemtl defaultMat\n")
+
+        # Write faces
+        print("    writing %d faces" % len(t_pos_idx))
+        for i in range(len(t_pos_idx)):
+            f.write("f ")
+            for j in range(3):
+                f.write(
+                    " %s/%s/%s"
+                    % (
+                        str(t_pos_idx[i][j] + 1),
+                        "" if v_tex is None else str(t_tex_idx[i][j] + 1),
+                        "" if v_nrm is None else str(t_nrm_idx[i][j] + 1),
+                    )
+                )
+            f.write("\n")
+
+    if save_material and mesh.material is not None:
+        mtl_file = os.path.join(folder, fname + ".mtl")
+        print("Writing material: ", mtl_file)
+        material.save_mtl(
+            mtl_file,
+            mesh.material,
+            mesh=mesh.get_n(idx),
+            feat=feat,
+            resolution=resolution,
+        )
+
+    print("Done exporting mesh")

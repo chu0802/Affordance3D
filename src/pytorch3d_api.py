@@ -22,9 +22,9 @@ def put_obj_into_scene(obj: Meshes, scene: Meshes, R, T, S):
     obj_f += scene.verts_packed().shape[0]
 
     transforms = (
-        [Scale(S, device=scene.device)]
+        [Scale(*S, device=scene.device)]
         + [
-            RotateAxisAngle(angle, axis, device=scene.device)
+            RotateAxisAngle(angle, axis, device=scene.device, degrees=False)
             for angle, axis in zip(R, ["X", "Y", "Z"])
         ]
         + [Translate(*T, device=scene.device)]

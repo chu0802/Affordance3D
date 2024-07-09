@@ -1,0 +1,35 @@
+fauna:
+    prior_shape_path: horse.obj
+
+path_prefix: "/mnt/data/merced/data"
+scene_idx: 0
+prompt_idx: 2
+log_dir: "data/log_genzi"
+view_points_path: "view_points.json"
+
+geoaware_cfg:
+  aggre_net_path: /home/chuyu/merced/geoaware/results_spair/best_856.PTH
+
+render:
+  image_size: 1024
+
+data:
+    root_dir: "${path_prefix}/sketchfab"
+    scenes:
+        - "quintyn-glenn-city-scene-kyoto"
+        - "low-poly-farm-v2"
+        - "low-poly-winter-scene"
+        - "a-food-truck-project"
+        - "bangkok-city-scene"
+        - "modular_gym"
+        - "venice-city-scene-1dae08-aaron-ongena"
+        - "ww2-cityscene-carentan-inspired"
+    cfg_suffix: "_v1.yml"
+    max_views: 16
+    num_viewpoints: 256
+    view_distances:
+        - 3.0
+        - 3.0
+    patch_radius: 0.15
+    use_at_normal: True
+    fov: 60

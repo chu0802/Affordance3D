@@ -3,6 +3,7 @@ from pathlib import Path
 import numpy as np
 import torch
 from omegaconf import OmegaConf
+from pytorch3d.io import save_obj
 from pytorch3d.renderer import look_at_view_transform
 
 from src.fauna_api import generate_fauna
@@ -24,6 +25,9 @@ def main(cfg, scene_cfg):
 
     fauna = generate_fauna(cfg, device)
 
+    verts, faces = fauna.get_mesh_verts_faces(0)
+    save_obj("horse.obj", verts, faces)
+
     view_points, look_at = load_view_points(scene_name, prompt, cfg["view_points_path"])
 
     R, T = look_at_view_transform(
@@ -34,8 +38,8 @@ def main(cfg, scene_cfg):
         fauna,
         mesh,
         R=[100.0, 0.0, -90.0],
-        T=np.array(look_at) + [-0.4, -0.9, -0.2],
-        S=0.2,
+        T=np.array(look_at) + [-0.4, -0.9, 0.6],
+        S=0.4,
     )
 
     render(

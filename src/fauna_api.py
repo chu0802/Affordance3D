@@ -206,5 +206,6 @@ def generate_fauna(cfg: Dict[str, Any], device: str = "cuda"):
         )
 
         output_mesh: Mesh = Instance_out[0]
+        arti_params = Instance_out[10]
 
         return output_mesh.to_pytorch3d()

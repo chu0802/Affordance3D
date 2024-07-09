@@ -5,8 +5,11 @@ log_dir: "data/log_genzi"
 view_points_path: "view_points.json"
 object_path: "koala.obj"
 
+geoaware_cfg:
+  aggre_net_path: /home/chuyu/merced/geoaware/results_spair/best_856.PTH
+
 fauna_cfg:
-  input_image: example_images/koala.png
+  input_image: example_images/horse/before.jpg
   model_path: "ckpts/iter0800000.pth"
   model_config_path: "ckpts/configs.yml"
 

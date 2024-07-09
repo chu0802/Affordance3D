@@ -11,14 +11,8 @@ from pytorch3d.renderer import (
 )
 
 
-def render(
-    meshes,
-    R,
-    T,
-    pt_light_position=[0.0, 0.0, -1.0],
-    image_size=1024,
-    image_dir="./data",
-    device="cuda",
+def get_renderer(
+    R, T, pt_light_position=[0.0, 0.0, -1.0], image_size=256, device="cuda"
 ):
     cameras = FoVPerspectiveCameras(
         R=R,
@@ -44,12 +38,29 @@ def render(
         ),
     )
 
-    clone_meshes = meshes.extend(len(cameras))
+    return renderer
 
-    images = renderer(clone_meshes, cameras=cameras, lights=pt_lights)
 
-    for i in range(len(cameras)):
-        img_array = (images[i, ..., :3].cpu().numpy() * 255).astype(np.uint8)
+def store_images(images, image_dir):
+    for i in range(len(images)):
+        img_array = (images[i, ..., :3].detach().cpu().numpy() * 255).astype(np.uint8)
         img = Image.fromarray(img_array)
 
         img.save((image_dir / f"view_{i}.png").as_posix())
+
+
+def render(
+    meshes,
+    R,
+    T,
+    pt_light_position=[0.0, 0.0, -1.0],
+    image_dir="./data",
+    device="cuda",
+):
+    renderer = get_renderer(R, T, pt_light_position, device=device)
+
+    clone_meshes = meshes.extend(len(R))
+
+    images = renderer(clone_meshes)
+
+    store_images(images, image_dir)
