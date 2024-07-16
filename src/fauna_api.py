@@ -7,6 +7,7 @@ from PIL import Image
 from src.fauna.model_ddp import Unsup3DDDP
 from src.fauna.render.mesh import Mesh
 from src.fauna.utils.misc import load_yaml
+from src.fauna.render.obj import write_obj
 
 
 def expand2square(pil_img: Image, background_color: tuple):
@@ -186,7 +187,7 @@ def generate_fauna(cfg: Dict[str, Any], device: str = "cuda"):
             memory_bank_dim=128,
         )
 
-        prior_shape, _, _ = model.netPrior(
+        prior_shape, dino_pred, classes_vectors = model.netPrior(
             category_name="tmp",
             perturb_sdf=False,
             total_iter=total_iter,
@@ -204,8 +205,54 @@ def generate_fauna(cfg: Dict[str, Any], device: str = "cuda"):
             total_iter=total_iter,
             is_training=False,
         )
+        
+        (
+            shape,
+            pose_raw,
+            pose,
+            mvp,
+            w2c,
+            campos,
+            texture,
+            im_features,
+            dino_feat_im_calc,
+            deformation,
+            arti_params,
+            light,
+            forward_aux,
+        ) = Instance_out
+        
+        class_vector = None
+        if classes_vectors is not None:
+            if len(classes_vectors.shape) == 1:
+                class_vector = classes_vectors
+        (
+            image_pred,
+            mask_pred,
+            flow_pred,
+            dino_feat_im_pred,
+            albedo,
+            shading,
+        ) = model.render(
+            shape,
+            texture,
+            mvp,
+            w2c,
+            campos,
+            (256, 256),
+            background=model.background_mode,
+            im_features=im_features,
+            light=light,
+            prior_shape=prior_shape,
+            render_flow = False,
+            dino_pred=dino_pred,
+            class_vector=class_vector[None, :].expand(1, -1),
+            num_frames=1,
+            spp=model.renderer_spp,
+            im_features_map=None,
+        )  # the real rendering process        
+        # write_obj(folder=".", fname="test.obj", mesh=shape, idx=0, save_material=True, feat=None)
 
-        output_mesh: Mesh = Instance_out[0]
-        arti_params = Instance_out[10]
+        # Image.fromarray((image_pred[0].permute(1, 2, 0).cpu().numpy() * 255).astype('uint8')).save("output_iamge.png")
 
-        return output_mesh.to_pytorch3d()
+        return shape.to_pytorch3d()
