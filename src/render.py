@@ -25,7 +25,8 @@ def get_renderer(
         image_size=image_size,
         blur_radius=0,
         faces_per_pixel=1,
-        bin_size=49,
+        # bin_size=48,
+        max_faces_per_bin=100000,  # Increase this value
     )
 
     renderer = MeshRenderer(
@@ -38,7 +39,7 @@ def get_renderer(
         ),
     )
 
-    return renderer
+    return renderer, cameras
 
 
 def store_images(images, image_dir):
@@ -56,8 +57,9 @@ def render(
     pt_light_position=[0.0, 0.0, -1.0],
     image_dir="./data",
     device="cuda",
+    image_size=256,
 ):
-    renderer = get_renderer(R, T, pt_light_position, device=device)
+    renderer, _ = get_renderer(R, T, pt_light_position, device=device, image_size=image_size)
 
     clone_meshes = meshes.extend(len(R))
 
