@@ -5,6 +5,8 @@ ckpts/
 example_images/
 *.glb
 .vscode/
+res/
+first_res/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
