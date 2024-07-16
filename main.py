@@ -23,10 +23,11 @@ def main(cfg, scene_cfg):
 
     mesh = get_textured_mesh(scene_cfg["scene.mesh_path"], device=device)
 
-    fauna = generate_fauna(cfg, device)
-
-    verts, faces = fauna.get_mesh_verts_faces(0)
-    save_obj("horse.obj", verts, faces)
+    fauna = get_textured_mesh(cfg["fauna_cfg.prior_shape_path"], device=device)
+    
+    fauna.verts_list()[0] *= 1e-3
+    # fauna = generate_fauna(cfg, device)
+    # verts, faces = fauna.get_mesh_verts_faces(0)
 
     view_points, look_at = load_view_points(scene_name, prompt, cfg["view_points_path"])
 
@@ -37,9 +38,10 @@ def main(cfg, scene_cfg):
     concat_mesh = put_obj_into_scene(
         fauna,
         mesh,
-        R=[100.0, 0.0, -90.0],
-        T=np.array(look_at) + [-0.4, -0.9, 0.6],
-        S=0.4,
+        R=[0.0, 0.0, -90.0],
+        T=np.array(look_at) + [0.4, -0.9, -0.6],
+        S=[1],
+        degrees=True,
     )
 
     render(
