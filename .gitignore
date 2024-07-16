@@ -8,6 +8,8 @@ example_images/
 res/
 first_res/
 *.png
+*.mtl
+*.jpg
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
