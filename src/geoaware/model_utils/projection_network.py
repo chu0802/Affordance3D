@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 import torch.nn.functional as F
-from model_utils.resnet import BottleneckBlock, ResNet
+from .resnet import BottleneckBlock, ResNet
 from torch import nn
 
 

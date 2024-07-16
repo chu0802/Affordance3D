@@ -47,6 +47,10 @@ class ViTExtractor:
         self.model = ViTExtractor.patch_vit_resolution(self.model, stride=stride)
         self.model.eval()
         self.model.to(self.device)
+        
+        for param in self.model.parameters():
+            param.requires_grad = False
+
         self.p = self.model.patch_embed.patch_size
         if type(self.p) == tuple:
             self.p = self.p[0]
@@ -222,10 +226,9 @@ class ViTExtractor:
         return prep_img, pil_image
 
     def preprocess_torch_image(self, torch_image):
-        img_array = torch_image[..., :3] * 255
         prep = transforms.Compose([transforms.Normalize(mean=self.mean, std=self.std)])
 
-        prep_img = prep(img_array)[None, ...]
+        prep_img = prep(torch_image)[None, ...]
         return prep_img
 
     def preprocess_pil(self, pil_image):

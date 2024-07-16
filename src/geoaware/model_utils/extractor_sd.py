@@ -172,6 +172,7 @@ def load_model(
     decoder_only=True,
     encoder_only=False,
     resblock_only=False,
+    device="cuda",
 ):
     cfg = model_zoo.get_config(config_path, trained=True)
 
@@ -194,7 +195,7 @@ def load_model(
     aug = instantiate(dataset_cfg.mapper).augmentations
 
     model = instantiate_odise(cfg.model)
-    model.to(cfg.train.device)
+    model.to(device)
     ODISECheckpointer(model).load(cfg.train.init_checkpoint)
 
     return model, aug
