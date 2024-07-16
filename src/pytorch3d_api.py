@@ -14,30 +14,37 @@ def get_mesh_with_texture_atlas(filename, device="cuda"):
     text = TexturesAtlas([torch.ones(faces.shape[0], 1, 1, 3).to(device)])
     return Meshes(verts=[verts], faces=[faces], textures=text)
 
+def get_transform_function(R, T, S, device="cuda", degrees=False):
+    transforms = (
+        [Scale(*S, device=device)]
+        + [
+            RotateAxisAngle(angle, axis, device=device, degrees=degrees)
+            for angle, axis in zip(R, ["X", "Y", "Z"])
+        ]
+        + [Translate(*T, device=device)]
+    )
+    return transforms[0].compose(*transforms[1:])
 
-def put_obj_into_scene(obj: Meshes, scene: Meshes, R, T, S):
-    obj_v = obj.verts_packed().clone()
-    obj_f = obj.faces_packed().clone()
-
-    obj_f += scene.verts_packed().shape[0]
-
+def put_obj_into_scene(obj: Meshes, scene: Meshes, R, T, S, degrees=False):
+    
     transforms = (
         [Scale(*S, device=scene.device)]
         + [
-            RotateAxisAngle(angle, axis, device=scene.device, degrees=False)
+            RotateAxisAngle(angle, axis, device=scene.device, degrees=degrees)
             for angle, axis in zip(R, ["X", "Y", "Z"])
         ]
         + [Translate(*T, device=scene.device)]
     )
 
-    obj_v = transforms[0].compose(*transforms[1:]).transform_points(obj_v)
+    obj_v = transforms[0].compose(*transforms[1:]).transform_points(obj.verts_packed())
+    obj_f = obj.faces_packed() + scene.verts_packed().shape[0]
 
     verts = torch.cat([scene.verts_packed(), obj_v])
     faces = torch.cat([scene.faces_packed(), obj_f])
     text = TexturesAtlas(
         [torch.cat([scene.textures.atlas_packed(), obj.textures.atlas_packed()])]
     )
-    return Meshes(verts=[verts], faces=[faces] + [obj_f], textures=text)
+    return Meshes(verts=[verts], faces=[faces], textures=text)
 
 
 def get_textured_mesh(filename, device="cuda", texture_atlas_size=1):
